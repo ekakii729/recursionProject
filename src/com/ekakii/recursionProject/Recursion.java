@@ -5,6 +5,10 @@
  */
 
 package com.ekakii.recursionProject;
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 
@@ -104,6 +108,66 @@ public class Recursion {
         pattern(numberOfStars / 2, buffer + numberOfStars / 2);
     }
 
+    /** Method Name: readingShapeInnerLoop
+     * @Author Abhay Manoj
+     * @Date October 24, 2023
+     * @Modified October 24, 2023
+     * @Description Reads the columns of the provided shape
+     * @Parameters line - line of the shape that was read, characterArray - array that is being written to, currentRow - current row of the shape, currentColumn - current column of the shape
+     * @Returns N/A, Data Type: Void
+     * Dependencies: N/A
+     * Throws/Exceptions: N/A
+     */
+
+    private static void readingShapeInnerLoop(String line, char[][] characterArray, int currentRow, int currentColumn) {
+        if (currentColumn == characterArray[currentRow].length) return;
+        characterArray[currentRow][currentColumn] = line.charAt(currentColumn);
+        readingShapeInnerLoop(line, characterArray, currentRow, currentColumn + 1);
+    }
+
+    /** Method Name: readingShapeInnerLoop
+     * @Author Abhay Manoj
+     * @Date October 24, 2023
+     * @Modified October 24, 2023
+     * @Description Reads the rows of the provided shape
+     * @Parameters reader - reader used to read the file, characterArray - array that is being written to, currentRow - current row of the shape
+     * @Returns N/A, Data Type: Void
+     * Dependencies: BufferedReader
+     * Throws/Exceptions: IOException
+     */
+
+    private static void readingShapeOuterLoop(BufferedReader reader, char[][] characterArray, int currentRow) throws IOException {
+        if (currentRow == characterArray.length) return;
+        String line = reader.readLine();
+        readingShapeInnerLoop(line, characterArray, currentRow, 0);
+        readingShapeOuterLoop(reader, characterArray, currentRow + 1);
+    }
+
+    /** Method Name: createCharArray
+     * @Author Abhay Manoj
+     * @Date October 23, 2023
+     * @Modified October 24, 2023
+     * @Description Returns array of chars filled with shape
+     * @Parameters reader - used to read the txt file
+     * @Returns An array of characters which contains the shape in the file, Data Type: Char[][]
+     * Dependencies: BufferedReader, IOException
+     * Throws/Exceptions: RuntimeException
+     */
+
+    private static char[][] createCharArray(BufferedReader reader) {
+        try {
+            int numberOfColumns = Integer.parseInt(reader.readLine());
+            int numberOfRows = Integer.parseInt(reader.readLine());
+            char[][] characterArray = new char[numberOfRows][numberOfColumns];
+            readingShapeOuterLoop(reader, characterArray, 0);
+            reader.close();
+            return characterArray;
+        } catch (IOException e) {
+            System.out.println("IO ERROR --> " + e);
+            throw new RuntimeException();
+        }
+    }
+
     /** Method Name: main
      * @Author Abhay Manoj
      * @Date October 20, 2023
@@ -115,7 +179,14 @@ public class Recursion {
      * Throws/Exceptions: N/A
      */
 
-    public static void main(String[] args) {
-        pattern(16,2);
+    public static void main(String[] args) throws FileNotFoundException {
+        BufferedReader reader = new BufferedReader(new FileReader("data41.txt"));
+        char[][] arr = createCharArray(reader);
+        for(char[] x : arr) {
+            for (char y : x) {
+                System.out.print(y);
+            }
+            System.out.println();
+        }
     }
 }
