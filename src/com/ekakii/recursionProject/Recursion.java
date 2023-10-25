@@ -6,11 +6,11 @@
 
 package com.ekakii.recursionProject;
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Scanner;
 
 public class Recursion {
 
@@ -19,19 +19,19 @@ public class Recursion {
      * @Date October 20, 2023
      * @Modified October 20, 2023
      * @Description Fills provided hashmap with the number of occurrences of each character in the string
-     * @Parameters countOfCharacters - each character along with its number of occurrences, givenString - string that is being checked, i - index for the string
+     * @Parameters countOfCharacters - each character along with its number of occurrences, givenString - string that is being checked, characterCount - index for the string
      * @Returns N/A, Data Type: Void
      * Dependencies: HashMap
      * Throws/Exceptions: N/A
      */
 
-    private static void fillHashMapWithCount(HashMap<Character, Integer> countOfCharacters, String givenString, int i) {
-        if (i == -1) return;
-        Integer currentCount = countOfCharacters.get(givenString.charAt(i)); // current count of the character being accessed
+    private static void fillHashMapWithCount(HashMap<Character, Integer> countOfCharacters, String givenString, int characterCount) {
+        if (characterCount == -1) return;
+        Integer currentCount = countOfCharacters.get(givenString.charAt(characterCount)); // current count of the character being accessed
         if (currentCount == null) currentCount = 1;
         else currentCount++;
-        countOfCharacters.put(givenString.charAt(i), currentCount);
-        fillHashMapWithCount(countOfCharacters, givenString, i - 1);
+        countOfCharacters.put(givenString.charAt(characterCount), currentCount);
+        fillHashMapWithCount(countOfCharacters, givenString, characterCount - 1);
     }
 
     /** Method Name: checkCharacterCounts
@@ -64,7 +64,7 @@ public class Recursion {
      * Throws/Exceptions: N/A
      */
 
-    public static boolean possiblePal(String givenString) {
+    private static boolean possiblePal(String givenString) {
         HashMap<Character, Integer> countOfCharacters = new HashMap<>(); // contains each character of the string along with its number of occurrences
         fillHashMapWithCount(countOfCharacters, givenString, givenString.length() - 1);
         Iterator<Integer> valueIterator = countOfCharacters.values().iterator(); // used to access values of hashmap
@@ -76,16 +76,16 @@ public class Recursion {
      * @Date October 21, 2023
      * @Modified October 21, 2023
      * @Description Prints out a character the specified number of times
-     * @Parameters character - character to be printed, i - how many times to print it out
+     * @Parameters character - character to be printed, timesToPrint - how many times to print it out
      * @Returns N/A, Data Type: Void
      * Dependencies: N/A
      * Throws/Exceptions: N/A
      */
 
-    private static void printChar(char character, int i) {
-        if (i == 0) return;
+    private static void printChar(char character, int timesToPrint) {
+        if (timesToPrint == 0) return;
         System.out.print(character);
-        printChar(character, i - 1);
+        printChar(character, timesToPrint - 1);
     }
 
     /** Method Name: pattern
@@ -99,7 +99,7 @@ public class Recursion {
      * Throws/Exceptions: N/A
      */
 
-    public static void pattern(int numberOfStars, int buffer) {
+    private static void pattern(int numberOfStars, int buffer) {
         if (numberOfStars == 0) return;
         pattern(numberOfStars / 2, buffer);
         printChar(' ', buffer);
@@ -108,7 +108,7 @@ public class Recursion {
         pattern(numberOfStars / 2, buffer + numberOfStars / 2);
     }
 
-    /** Method Name: readingShapeInnerLoop
+    /** Method Name: readingShapeColumns
      * @Author Abhay Manoj
      * @Date October 24, 2023
      * @Modified October 24, 2023
@@ -119,13 +119,13 @@ public class Recursion {
      * Throws/Exceptions: N/A
      */
 
-    private static void readingShapeInnerLoop(String line, char[][] characterArray, int currentRow, int currentColumn) {
+    private static void readingShapeColumns(String line, char[][] characterArray, int currentRow, int currentColumn) {
         if (currentColumn == characterArray[currentRow].length) return;
         characterArray[currentRow][currentColumn] = line.charAt(currentColumn);
-        readingShapeInnerLoop(line, characterArray, currentRow, currentColumn + 1);
+        readingShapeColumns(line, characterArray, currentRow, currentColumn + 1);
     }
 
-    /** Method Name: readingShapeInnerLoop
+    /** Method Name: readDataToCharArray
      * @Author Abhay Manoj
      * @Date October 24, 2023
      * @Modified October 24, 2023
@@ -136,11 +136,11 @@ public class Recursion {
      * Throws/Exceptions: IOException
      */
 
-    private static void readingShapeOuterLoop(BufferedReader reader, char[][] characterArray, int currentRow) throws IOException {
+    private static void readDataToCharArray(BufferedReader reader, char[][] characterArray, int currentRow) throws IOException {
         if (currentRow == characterArray.length) return;
-        String line = reader.readLine();
-        readingShapeInnerLoop(line, characterArray, currentRow, 0);
-        readingShapeOuterLoop(reader, characterArray, currentRow + 1);
+        String line = reader.readLine(); // reading line from file
+        readingShapeColumns(line, characterArray, currentRow, 0);
+        readDataToCharArray(reader, characterArray, currentRow + 1);
     }
 
     /** Method Name: createCharArray
@@ -150,22 +150,175 @@ public class Recursion {
      * @Description Returns array of chars filled with shape
      * @Parameters reader - used to read the txt file
      * @Returns An array of characters which contains the shape in the file, Data Type: Char[][]
-     * Dependencies: BufferedReader, IOException
-     * Throws/Exceptions: RuntimeException
+     * Dependencies: BufferedReader
+     * Throws/Exceptions: IOException
      */
 
-    private static char[][] createCharArray(BufferedReader reader) {
+    private static char[][] createCharArray(BufferedReader reader) throws IOException {
+        int numberOfColumns = Integer.parseInt(reader.readLine()); // first number in file is columns
+        int numberOfRows = Integer.parseInt(reader.readLine()); // second line in file is rows
+        char[][] characterArray = new char[numberOfRows][numberOfColumns]; // making character array from above info
+        readDataToCharArray(reader, characterArray, 0);
+        return characterArray;
+    }
+
+    /** Method Name: getBlobSize
+     * @Author Abhay Manoj
+     * @Date October 24, 2023
+     * @Modified October 25, 2023
+     * @Description Gets the size of a blob
+     * @Parameters currentRow - current row that is being looked at, currentColumn - current column that is being looked at, characterArray - array of characters that is being read, charHasBeenVisited - if the character has been visited already
+     * @Returns The size of the blob, Data Type: Integer
+     * Dependencies: N/A
+     * Throws/Exceptions: N/A
+     */
+
+    private static int getBlobSize(int currentRow, int currentColumn, char[][] characterArray, boolean[][] charHasBeenVisited) {
+        if (currentRow < 0 || currentRow >= characterArray.length || currentColumn < 0 || currentColumn >= characterArray[0].length || charHasBeenVisited[currentRow][currentColumn] || characterArray[currentRow][currentColumn] == '.') return 0;
+        charHasBeenVisited[currentRow][currentColumn] = true;
+        int blobSize = 1; // amount of characters within the 'blob'
+        blobSize += getBlobSize(currentRow + 1, currentColumn, characterArray, charHasBeenVisited);
+        blobSize += getBlobSize(currentRow - 1, currentColumn, characterArray, charHasBeenVisited);
+        blobSize += getBlobSize(currentRow, currentColumn + 1, characterArray, charHasBeenVisited);
+        blobSize += getBlobSize(currentRow, currentColumn - 1, characterArray, charHasBeenVisited);
+        return blobSize;
+    }
+
+    /** Method Name: checkShapeColumns
+     * @Author Abhay Manoj
+     * @Date October 25, 2023
+     * @Modified October 25, 2023
+     * @Description Gets the number of blobs in shape
+     * @Parameters currentRow - current row that is being looked at, currentColumn - current column that is being looked at, characterArray - array of characters that is being read, charHasBeenVisited - if the character has been visited already
+     * @Returns The number of blobs within one shape, Data Type: Integer
+     * Dependencies: N/A
+     * Throws/Exceptions: N/A
+     */
+
+    private static int checkShapeColumns(int currentRow, int currentColumn, char[][] characterArray, boolean[][] charHasBeenVisited) {
+        if (currentColumn == characterArray[0].length) return 0;
+        if (charHasBeenVisited[currentRow][currentColumn] || characterArray[currentRow][currentColumn] != 'X') return checkShapeColumns(currentRow, currentColumn + 1, characterArray, charHasBeenVisited);
+        getBlobSize(currentRow, currentColumn, characterArray, charHasBeenVisited);
+        return 1 + checkShapeColumns(currentRow, currentColumn + 1, characterArray, charHasBeenVisited);
+    }
+
+    /** Method Name: checkShapeRows
+     * @Author Abhay Manoj
+     * @Date October 25, 2023
+     * @Modified October 25, 2023
+     * @Description Gets the number of blobs in shape
+     * @Parameters characterArray - array of characters that is being read, charHasBeenVisited - if the character has been visited already, currentRow - current row that is being looked at
+     * @Returns The number of blobs within one shape, Data Type: Integer
+     * Dependencies: N/A
+     * Throws/Exceptions: N/A
+     */
+
+    private static int checkShapeRows(char[][] characterArray, boolean[][] charHasBeenVisited, int currentRow) {
+        if (currentRow == characterArray.length) return 0;
+        int size = checkShapeColumns(currentRow, 0, characterArray, charHasBeenVisited);
+        return size + checkShapeRows(characterArray, charHasBeenVisited, currentRow + 1);
+    }
+
+    /** Method Name: getNumberOfBlobs
+     * @Author Abhay Manoj
+     * @Date October 25, 2023
+     * @Modified October 25, 2023
+     * @Description Gets the number of blobs within one shape
+     * @Parameters reader - used to read the file
+     * @Returns The number of blobs within one shape, Data Type: Integer
+     * Dependencies: N/A
+     * Throws/Exceptions: IOException
+     */
+
+    private static int getNumberOfBlobs(BufferedReader reader) throws IOException {
+        char[][] characterArray = createCharArray(reader);
+        boolean[][] charHasBeenVisited = new boolean[characterArray.length][characterArray[0].length];
+        return checkShapeRows(characterArray, charHasBeenVisited, 0);
+    }
+
+    /** Method Name: printShapeData
+     * @Author Abhay Manoj
+     * @Date October 25, 2023
+     * @Modified October 25, 2023
+     * @Description Prints out the number of blobs within one shape
+     * @Parameters reader - used to read the file, currentShapeIndex - the shape that is being looked at, numberOfShapes - how many shapes are in the file
+     * @Returns N/A, Data Type: N/A
+     * Dependencies: BufferedReader
+     * Throws/Exceptions: IOException
+     */
+
+    private static void printShapeData(BufferedReader reader, int currentShapeIndex, int numberOfShapes) throws IOException {
+        if (currentShapeIndex == numberOfShapes) return;
+        System.out.printf("In shape #%d, there is %d blobs.\n", currentShapeIndex + 1, getNumberOfBlobs(reader));
+        printShapeData(reader, currentShapeIndex + 1, numberOfShapes);
+    }
+
+    /** Method Name: printShapeData
+     * @Author Abhay Manoj
+     * @Date October 25, 2023
+     * @Modified October 25, 2023
+     * @Description Prints out the number of blobs within one shape
+     * @Parameters reader - used to read the file, currentShapeIndex - the shape that is being looked at, numberOfShapes - how many shapes are in the file
+     * @Returns N/A, Data Type: N/A
+     * Dependencies: BufferedReader
+     * Throws/Exceptions: IOException
+     */
+
+    private static void countShapes(Scanner input, String fileName) {
         try {
-            int numberOfColumns = Integer.parseInt(reader.readLine());
-            int numberOfRows = Integer.parseInt(reader.readLine());
-            char[][] characterArray = new char[numberOfRows][numberOfColumns];
-            readingShapeOuterLoop(reader, characterArray, 0);
+            BufferedReader reader = new BufferedReader(new FileReader(fileName));
+            System.out.print("Enter number of shapes within the file: ");
+            int numberOfShapes = Integer.parseInt(input.nextLine());
+            System.out.println();
+            printShapeData(reader, 0, numberOfShapes);
+            System.out.println();
             reader.close();
-            return characterArray;
         } catch (IOException e) {
             System.out.println("IO ERROR --> " + e);
-            throw new RuntimeException();
+            throw new RuntimeException(e);
         }
+    }
+
+    /** Method Name: printShapeData
+     * @Author Abhay Manoj
+     * @Date October 25, 2023
+     * @Modified October 25, 2023
+     * @Description Prints out the number of blobs within one shape
+     * @Parameters reader - used to read the file, currentShapeIndex - the shape that is being looked at, numberOfShapes - how many shapes are in the file
+     * @Returns N/A, Data Type: N/A
+     * Dependencies: BufferedReader
+     * Throws/Exceptions: IOException
+     */
+
+    private static void menuLoop(Scanner input, boolean canRun) {
+        if (!canRun) System.exit(0);
+        System.out.println("Please select an option.\n1. Check if a String can be a palindrome\n2. Print a cool fractal pattern\n3. Get the number of blobs from a file\n4. Quit\n");
+        int choice = Integer.parseInt(input.nextLine());
+        switch (choice) {
+            case 1 -> {
+                System.out.print("Enter the string you wish to check: ");
+                boolean canBePalindrome = possiblePal(input.nextLine());
+                String response = canBePalindrome ? "Yes, that can be a palindrome.\n" : "No, that cannot be a palindrome.\n";
+                System.out.println(response);
+            }
+            case 2 -> {
+                System.out.print("For the length of the fractal, enter a number that is a power of two: ");
+                int numberOfStars = Integer.parseInt(input.nextLine());
+                System.out.print("Enter the size of buffer between the console and the left hand side of the fractal: ");
+                int bufferSize = Integer.parseInt(input.nextLine());
+                System.out.println();
+                pattern(numberOfStars, bufferSize);
+                System.out.println();
+            }
+            case 3 -> {
+                System.out.print("Enter EXACT name of the file (ex. myFile.txt): ");
+                countShapes(input, input.nextLine());
+            }
+            case 4 -> {
+                System.out.println("Program has been closed.");
+                menuLoop(input, false);
+            }
+        } menuLoop(input, true);
     }
 
     /** Method Name: main
@@ -174,19 +327,14 @@ public class Recursion {
      * @Modified October 20, 2023
      * @Description main method of the program
      * @Parameters args - arguments to be passed in
-     * @Returns N/A, Data Type: Void
+     * @Returns N/A, Data
+     * Type: Void
      * Dependencies: N/A
      * Throws/Exceptions: N/A
      */
 
-    public static void main(String[] args) throws FileNotFoundException {
-        BufferedReader reader = new BufferedReader(new FileReader("data41.txt"));
-        char[][] arr = createCharArray(reader);
-        for(char[] x : arr) {
-            for (char y : x) {
-                System.out.print(y);
-            }
-            System.out.println();
-        }
-    }
+     public static void main(String[] args) {
+         System.out.println("Welcome to the recursion app.");
+         menuLoop(new Scanner(System.in), true);
+     }
 }
